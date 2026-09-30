@@ -1,41 +1,24 @@
-#include <stdio.h>            
-#include <stdlib.h>            
-#include <node.h>
+#include "node.h"
+#include "tree.h"
+#include "functions.h"
 
-typedef struct node {
-	char  name[64];       // node's name string
-	char  type;
-	struct node *child, *sibling, *parent;
-	// other fields if needed
-} NODE;
-
-
-NODE *root; 
+TREE *fileSystem;
 NODE *cwd;
-char *cmd[] = {"mkdir", "rmdir", "cd", "ls", "pwd", "creat", "rm", "save", "reload", "quit"};  // fill with list of commands
+NODE *root; 
 // other global variables
 
+int main() 
+{
+	char pathName[64] = "/A/B/C/D";
+	char dirnameOutput[64];
+	char basenameOutput[64];
 
-int initialize() {
-	root = (NODE *)malloc(sizeof(NODE));
-	strcpy(root->name, "/");
-	root->parent = root;
-	root->sibling = 0;
-	root->child = 0;
-	root->type = 'D';
-	cwd = root;
-	// other steps as needed
-	
-	printf("Filesystem initialized!\n");
-}
+	SplitPath(pathName, dirnameOutput, basenameOutput);
 
-int main() {
-	initialize();
-	// other initialization as needed
+	printf("Path: %s\n", pathName);
+	printf("Dirname: %s\n", dirnameOutput);
+	printf("Basename: %s\n", basenameOutput);
 
-	while(1) {
-		printf("Enter command: ");
-		// complete implementations
-	}
+	return 0;
 }
 

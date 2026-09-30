@@ -4,11 +4,11 @@ NODE* CreateNode(const char* newName, char newType)
 {
 	NODE* newNode = (NODE*)malloc(sizeof(NODE));
 
-	strncpy(newNode->mName, newName, sizeof(newNode->mName)-1);
-	newNode->mName[sizeof(newNode->mName)-1] = '\0';
-	newNode->mType = newType;
-
-	newNode->mChild= newNode->mSibling = newNode->mParent = NULL;
+	SetName(newNode, newName);
+	SetType(newNode, newType);
+	SetChild(newNode, NULL);
+	SetSibling(newNode, NULL);
+	SetParent(newNode, NULL);
 
 	return newNode;
 }
@@ -40,10 +40,9 @@ NODE* GetParent(NODE* curNode)
 }
 
 // Setters:
-void SetName(NODE *curNode, char* newName)
+void SetName(NODE *curNode, const char* newName)
 {
-	strncpy(curNode->mName, newName, sizeof(curNode->mName) -1);
-	curNode->mName[sizeof(curNode->mName)-1] = '\0';
+	strcpy(curNode->mName, newName);
 }
 
 void SetType(NODE *curNode, char newType)
@@ -71,11 +70,6 @@ void FreeNode (NODE *curNode)
 {
 	if(curNode)
 	{
-		free(curNode->mName);
-		free(curNode->mType);
-		free(curNode->mChild);
-		free(curNode->mSibling);
-		free(curNode->mParent);
 		free(curNode);
 	}
 }

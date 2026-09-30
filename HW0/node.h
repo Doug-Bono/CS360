@@ -2,7 +2,9 @@
 #define NODE_H
 
 #include <stdio.h>            
-#include <stdlib.h>            
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>            
 // additional headers as needed
 
 typedef struct node {
@@ -23,7 +25,7 @@ NODE* GetSibling(NODE* node);
 NODE* GetParent(NODE* node);
 
 // Setters:
-void SetName (NODE *node, char *newName);
+void SetName (NODE *node, const char *newName);
 void SetType (NODE *node, char newType);
 void SetChild (NODE *node, NODE *childPtr);
 void SetSibling (NODE *node, NODE *siblingPtr);

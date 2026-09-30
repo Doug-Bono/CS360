@@ -3,8 +3,13 @@
 // Constructor:
 TREE* CreateTree()
 {
-    TREE* newTree;
-    newTree->mRoot = CreateNode("/", "D"); // Creates root of the tree.
+    TREE *newTree = (TREE*)malloc(sizeof(TREE));
+    NODE *newRoot = CreateNode("/", 'D'); // Creates root of the tree.
+
+    SetParent(newRoot, newRoot);
+    SetSibling(newRoot, newRoot);
+
+    SetRoot(newTree, newRoot);
 
     return newTree;
 }
@@ -21,52 +26,89 @@ void SetRoot(TREE *newTree, NODE *newRoot)
     newTree->mRoot = newRoot;
 }
 
-// Destructor:
-void FreeTree(NODE *curTree)
+// Destructor Helper:
+void FreeSubtree(NODE *tgtNode)
 {
-    NODE *curNode = curTree->mChild;
+    NODE *tempNode = GetChild(tgtNode);
 
-    while(curNode != NULL)
+    while (tempNode != NULL)
     {
-        NODE *nextNode = curNode->mSibling;
-        FreeTree(curNode);
-        curNode = nextNode;
+        NODE *nextNode = GetSibling(tempNode);
+        FreeSubtree(tempNode);
+        tempNode = nextNode;
     }
+    FreeNode(tgtNode);
+}
 
+// Destructor:
+void FreeTree(TREE *curTree)
+{
+    FreeSubtree(GetRoot(curTree));
     free(curTree);
 }
 
 //Methods:
 
-/// @brief Method that navigates the tree and compares the name of the nodes to that of the new node's name.
-/// @param treeRoot Tree that we are navigating.
-/// @param tgtName Name of the node that we are trying to add.
-/// @return Returns the node with the same name as the node we are trying to add.
-NODE *FindNode(NODE *treeRoot, char *tgtName)
+NODE *FindChild(NODE *parentNode, char *tgtName)
 {
-    NODE *curNode = treeRoot->mChild;
+    NODE *curNode = GetChild(parentNode);
 
     while(curNode != NULL)
     {
-        if(strcmp(curNode->mChild, tgtName) == 0)
+        if(strcmp(GetName(curNode), tgtName) == 0)
         {
             return curNode;
         }
 
-        curNode = curNode->mSibling;
+        curNode = GetSibling(curNode); 
     }
 
     return NULL;
 }
 
-/// @brief Inserts a node into the tree. ChildPtr points to the oldest child, Siblingptr points to the oldest sibling.
-/// @param curTree Tree that we are trying to insert the node into.
-/// @param newNode Node that we are trying to insert.
-void InsertNode(TREE *curTree, NODE* newNode)
+/// @brief Inserts a new node into the tree. Pass in a pointer to a parent node and pointer to the node we are inserting. Inserts the new node as 
+//          the parent's child node if the parent does not have any children. If the parent has children, navigate through the chain of sibling nodes
+//          and insert the new node at the very end of the chain.
+/// @param parentNode The parent node of the new node we are trying to insert.
+/// @param newNode New node we are trying to insert.
+void InsertNode(NODE *parentNode, NODE *newNode)
 {
-    // NOT DONE ********************8
-    if (curTree->mRoot == NULL) // If tree is empty, set the new node as the root.
+    SetParent(newNode, parentNode); // Set the new node's parent ptr to point to parentNode
+    SetSibling(newNode, NULL);
+
+    if (GetChild(parentNode) == NULL) // If parent has no children, newNode becomes parent's child node
     {
-        SetRoot(curTree, newNode);
+        SetChild(parentNode, newNode);
+    }
+    else // If parent has a children node, append newNode to the end of the sibling chain
+    {
+        NODE* tempNode = GetChild(parentNode);
+
+        while (GetSibling(tempNode) != NULL) // Traversal
+        {
+            tempNode = GetSibling(tempNode);
+        }
+
+        SetSibling(tempNode, newNode);
+    }
+}
+
+void RemoveNode(NODE *tgtNode)
+{
+    NODE *parentNode = GetParent(tgtNode);
+
+    if (GetChild(parentNode) != tgtNode)
+    {
+        NODE *curNode = GetChild(parentNode);
+
+        while (GetSibling(curNode) != tgtNode)
+        {
+            curNode = GetSibling(curNode);
+        }
+        SetSibling(curNode, GetSibling(tgtNode));
+    }
+    else
+    {
+        SetChild(parentNode, GetSibling(tgtNode));
     }
 }
