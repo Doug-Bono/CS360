@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
+#include "functions.h"
 // other headers as needed
 
 /*
@@ -71,36 +72,11 @@ Recall: Trace always contains "I" in the first column (with no space before it) 
 
 #define ADDRESS_LENGTH 64  // 64-bit memory addressing
 
-// other variables as needed
-
-
-/* 
- * this function provides a standard way for your cache
- * simulator to display its final statistics (i.e., hit and miss)
- */ 
-void print_summary(int hits, int misses, int evictions)
-{
-    printf("hits:%d misses:%d evictions:%d\n", hits, misses, evictions);
-}
-
-/*
- * print usage info
- */
-void print_usage(char* argv[])
-{
-    printf("Usage: %s [-hv] -s <num> -E <num> -b <num> -t <file>\n", argv[0]);
-    printf("Options:\n");
-    printf("  -h         Print this help message.\n");
-    printf("  -v         Optional verbose flag.\n");
-    printf("  -s <num>   Number of set index bits.\n");
-    printf("  -E <num>   Number of lines per set.\n");
-    printf("  -b <num>   Number of block offset bits.\n");
-    printf("  -t <file>  Trace file.\n");
-    printf("\nExamples:\n");
-    printf("  linux>  %s -s 4 -E 1 -b 4 -t traces/trace01.dat\n", argv[0]);
-    printf("  linux>  %s -v -s 8 -E 2 -b 4 -t traces/trace01.dat\n", argv[0]);
-    exit(0);
-}
+int s = 0, E = 0, b = 0;
+bool verbose = false;
+Cacheline **Cache = NULL; // Cache[set][line]
+int hitCount = 0, missCount = 0, replaceCount = 0;
+size_t accessCount = 0;
 
 /*
  * starting point
@@ -109,11 +85,9 @@ int main(int argc, char* argv[])
 {
 	// complete your simulator
     int c;
-    int s = 0, E = 0, b = 0;
-    int verbose = 0;
     char *traceFile = NULL;
 
-    while ((c = getopt(arc, argv, "ab:")) != -1)
+    while ((c = getopt(argc, argv, "s:E:b:t:vh")) != -1)
     {
         switch(c)
         {
@@ -122,11 +96,11 @@ int main(int argc, char* argv[])
                 break;
             
             case 'E':
-                s = atoi(optarg);
+                E = atoi(optarg);
                 break;
 
             case 'b':
-                s = atoi(optarg);
+                b = atoi(optarg);
                 break;
 
             case 't':
@@ -134,10 +108,10 @@ int main(int argc, char* argv[])
                 break;
 
             case 'v':
-                verbose = 1;
+                verbose = true;
                 break;
             
-            case 'h':
+            case 'h': // Used code from PA1 documentation
                 print_usage(argv);
                 exit(0);
             
@@ -147,6 +121,80 @@ int main(int argc, char* argv[])
         }
     }
 
+    Cache = CreateCache(pow(2, s), E); // Initalize cache
+
+    FILE *fileInput = fopen(traceFile, "r");  // Read file 
+
+    char curLine[50];
+
+
+    //ReadTrace(fileInput, curLine);
+    
+    while (fgets(curLine, sizeof(curLine), fileInput) != NULL)
+    {
+        if (curLine[0] == 'I') // Ignore instruction lines ALSO CHANGE *******
+        {
+            continue;
+        }
+
+        char operation;
+        size_t address;
+        int size;
+
+        operation = 'A';
+        address = 123;
+        size = 1;
+
+        if (VerboseCheck())
+        {
+            printf("%c %zu, %d", operation, address, size);
+        }
+
+        if (operation == 'L' || operation == 'S')
+        {
+            // access_result r = access_cache((uint64_t)addr);
+
+            if (VerboseCheck())
+            {
+                // print_result(r);
+                // printf("\n");
+            }
+        }
+        
+        else if (operation == 'M')
+        {
+            // access_result r1 = access_cache((uint64_t)addr);
+            // access_result r2 = access_cache((uint64_t)addr);
+
+            if (VerboseCheck())
+            {
+                // print_result(r1);
+                // print_result(r2);
+                // printf("\n");               
+            }
+        }
+    }
+
+    fclose(fileInput);
+    free(Cache);
+
+    
+    // Debugging print statements
+    printf("THESE ARE THE VALUES WE HAVE CURRENTLY \n");
+    printf("VALUE FOR s: %d \n", s);
+    printf("VALUE FOR E: %d \n", E);
+    printf("VALUE FOR b: %d \n", b);
+    printf("VALUE FOR traceFile: %s \n", traceFile);
+    if (VerboseCheck())
+    {
+        printf("VerboseCheck() is true | verbose == true \n");
+    }
+    else
+    {
+        printf("VerboseCheck() is false | verbose != false \n");
+    }
+    printf("VALUE FOR NumSets: %d \n", (int)pow(2, s));
+    
     // output cache hit and miss statistics
     // print_summary(hit_count, miss_count, eviction_count);
     
